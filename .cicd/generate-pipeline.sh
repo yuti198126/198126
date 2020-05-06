@@ -482,29 +482,6 @@ if [[ ! "$PINNED" == 'false' || "$SKIP_MULTIVERSION_TEST" == 'false' ]]; then
 
 EOF
 fi
-# trigger eosio-lrt post pr
-if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB == "true" ]]; then
-    if ( [[ ! $PINNED == false ]] ); then
-        cat <<EOF
-  - label: ":pipeline: Trigger Long Running Tests"
-    trigger: "eosio-lrt"
-    async: true
-    build:
-      message: "Triggered by $BUILDKITE_PIPELINE_SLUG build $BUILDKITE_BUILD_NUMBER"
-      commit: "${BUILDKITE_COMMIT}"
-      branch: "${BUILDKITE_BRANCH}"
-      env:
-        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
-        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
-        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
-        BUILDKITE_TRIGGERED_FROM_BUILD_URL: "${BUILDKITE_BUILD_URL}"
-        SKIP_BUILD: "true"
-        SKIP_WASM_SPEC_TESTS: "true"
-        PINNED: "${PINNED}"
-
-EOF
-    fi
-fi
 # trigger eosio-sync-from-genesis for every build
 if [[ "$BUILDKITE_PIPELINE_SLUG" == 'eosio' && -z "${SKIP_INSTALL}${SKIP_LINUX}${SKIP_DOCKER}${SKIP_SYNC_TESTS}" ]]; then
     cat <<EOF
