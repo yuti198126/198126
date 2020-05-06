@@ -151,7 +151,7 @@ EOF
       TAG_COMMANDS: "git clone ${BUILDKITE_PULL_REQUEST_REPO:-$BUILDKITE_REPO} eos && cd eos && $GIT_FETCH git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive && export IMAGE_TAG=$(echo "$PLATFORM_JSON" | jq -r .FILE_NAME) && export PLATFORM_TYPE=$PLATFORM_TYPE && . ./.cicd/platforms/$PLATFORM_TYPE/$(echo "$PLATFORM_JSON" | jq -r .FILE_NAME).sh && cd ~/eos && cd .. && rm -rf eos"
       PROJECT_TAG: $(echo "$PLATFORM_JSON" | jq -r .HASHED_IMAGE_TAG)
     timeout: ${TIMEOUT:-180}
-    agents: "queue=mac-anka-large-node-fleet"
+    agents: "queue=mac-anka-test-fleet"
     skip: \${SKIP_$(echo "$PLATFORM_JSON" | jq -r .PLATFORM_NAME_UPCASE)_$(echo "$PLATFORM_JSON" | jq -r .VERSION_MAJOR)$(echo "$PLATFORM_JSON" | jq -r .VERSION_MINOR)}${SKIP_BUILD}
 EOF
     fi
@@ -227,7 +227,7 @@ EOF
             - 'registry_1'
             - 'registry_2'
           pre-execute-ping-sleep: "8.8.8.8"
-    agents: "queue=mac-anka-node-fleet"
+    agents: "queue=mac-anka-test-fleet"
     retry:
       manual:
         permit_on_passed: true
@@ -289,7 +289,7 @@ EOF
             - 'registry_1'
             - 'registry_2'
           pre-execute-ping-sleep: "8.8.8.8"
-    agents: "queue=mac-anka-node-fleet"
+    agents: "queue=mac-anka-test-fleet"
     retry:
       manual:
         permit_on_passed: true
@@ -354,7 +354,7 @@ EOF
             - 'registry_1'
             - 'registry_2'
           pre-execute-ping-sleep: "8.8.8.8"
-    agents: "queue=mac-anka-node-fleet"
+    agents: "queue=mac-anka-test-fleet"
     retry:
       manual:
         permit_on_passed: true
@@ -420,7 +420,7 @@ EOF
             - 'registry_1'
             - 'registry_2'
           pre-execute-ping-sleep: "8.8.8.8"
-    agents: "queue=mac-anka-node-fleet"
+    agents: "queue=mac-anka-test-fleet"
     retry:
       manual:
         permit_on_passed: true
@@ -460,29 +460,6 @@ if [[ ! "$PINNED" == 'false' || "$SKIP_MULTIVERSION_TEST" == 'false' ]]; then
     skip: ${SKIP_LINUX}${SKIP_UBUNTU_18_04}${SKIP_MULTIVERSION_TEST}
 
 EOF
-fi
-# trigger eosio-lrt post pr
-if [[ -z $BUILDKITE_TRIGGERED_FROM_BUILD_ID && $TRIGGER_JOB == "true" ]]; then
-    if ( [[ ! $PINNED == false ]] ); then
-        cat <<EOF
-  - label: ":pipeline: Trigger Long Running Tests"
-    trigger: "eosio-lrt"
-    async: true
-    build:
-      message: "Triggered by $BUILDKITE_PIPELINE_SLUG build $BUILDKITE_BUILD_NUMBER"
-      commit: "${BUILDKITE_COMMIT}"
-      branch: "${BUILDKITE_BRANCH}"
-      env:
-        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
-        BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
-        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
-        BUILDKITE_TRIGGERED_FROM_BUILD_URL: "${BUILDKITE_BUILD_URL}"
-        SKIP_BUILD: "true"
-        SKIP_WASM_SPEC_TESTS: "true"
-        PINNED: "${PINNED}"
-
-EOF
-    fi
 fi
 # trigger eosio-sync-from-genesis for every build
 if [[ "$BUILDKITE_PIPELINE_SLUG" == 'eosio' && -z "${SKIP_INSTALL}${SKIP_LINUX}${SKIP_DOCKER}${SKIP_SYNC_TESTS}" ]]; then
@@ -604,7 +581,7 @@ cat <<EOF
             - 'registry_2'
           pre-execute-ping-sleep: "8.8.8.8"
     agents:
-      - "queue=mac-anka-node-fleet"
+      - "queue=mac-anka-test-fleet"
     timeout: ${TIMEOUT:-10}
     skip: ${SKIP_MACOS_10_14}${SKIP_PACKAGE_BUILDER}${SKIP_MAC}
 
@@ -619,12 +596,6 @@ cat <<EOF
     skip: ${SKIP_INSTALL}${SKIP_LINUX}${SKIP_DOCKER}${SKIP_PACKAGE_BUILDER}
 
   - wait
-
-  - label: ":git: Git Submodule Regression Check"
-    command: "./.cicd/submodule-regression-check.sh"
-    agents:
-      queue: "automation-basic-builder-fleet"
-    timeout: ${TIMEOUT:-5}
 
   - label: ":beer: Brew Updater"
     command: |
