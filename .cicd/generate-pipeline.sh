@@ -9,7 +9,7 @@ BUILDKITE_BUILD_AGENT_QUEUE='automation-eks-eos-builder-fleet'
 BUILDKITE_TEST_AGENT_QUEUE='automation-eks-eos-tester-fleet'
 [[ -z "$ROUNDS" ]] && export ROUNDS='1'
 LINUX_CONCURRENCY='8'
-MAC_CONCURRENCY='2'
+MAC_CONCURRENCY='20'
 LINUX_CONCURRENCY_GROUP='eos-scheduled-build'
 MAC_CONCURRENCY_GROUP='eos-scheduled-build-mac'
 
