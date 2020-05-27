@@ -122,7 +122,7 @@ cat <<EOF
       - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' --build '137e1830-d0a2-4904-91eb-fc2c567e5bc6' && tar -xzf build.tar.gz"
       - "cd eos && ./.cicd/test.sh scripts/serial-test.sh ship_test"
     plugins:
-      - EOSIO/anka#v0.6.0:
+      - EOSIO/anka#v0.6.1:
           no-volume: true
           inherit-environment-vars: true
           vm-name: 10.15.4_6C_14G_40G
@@ -130,6 +130,7 @@ cat <<EOF
           always-pull: true
           debug: true
           wait-network: true
+          wait-time: true
           failover-registries:
             - 'registry_1'
             - 'registry_2'
