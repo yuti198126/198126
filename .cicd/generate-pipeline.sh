@@ -130,6 +130,7 @@ cat <<EOF
           always-pull: true
           debug: true
           wait-network: true
+          wait-time: true
           failover-registries:
             - 'registry_1'
             - 'registry_2'
