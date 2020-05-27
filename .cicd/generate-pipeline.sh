@@ -142,6 +142,32 @@ cat <<EOF
     timeout: 60
     skip: ${SKIP_MACOS_10_15}
 
+  - label: ":darwin: macOS 10.15 - ship_test"
+    command:
+      - "git clone \$BUILDKITE_REPO eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
+      - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' --build '137e1830-d0a2-4904-91eb-fc2c567e5bc6' && tar -xzf build.tar.gz"
+      - "cd eos && ./.cicd/test.sh scripts/serial-test.sh ship_test"
+    plugins:
+      - EOSIO/anka#v0.6.0:
+          no-volume: true
+          inherit-environment-vars: true
+          vm-name: 10.15.4_6C_14G_40G
+          vm-registry-tag: clean::cicd::git-ssh::nas::brew::buildkite-agent::eos-macos-10.15-pinned-cbf68aff3c49d8c672b28157f2433a977a386c81
+          always-pull: true
+          debug: true
+          wait-network: true
+          failover-registries:
+            - 'registry_1'
+            - 'registry_2'
+      - EOSIO/skip-checkout#v0.1.1:
+          cd: ~
+    agents: "queue=mac-anka-test-fleet"
+    retry:
+      manual:
+        permit_on_passed: true
+    timeout: 60
+    skip: ${SKIP_MACOS_10_15}
+
 EOF
     IFS=$oIFS
     if [[ "$ROUND" != "$ROUNDS" ]]; then
