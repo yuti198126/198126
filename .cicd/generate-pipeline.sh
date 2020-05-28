@@ -116,13 +116,89 @@ for ROUND in $(seq 1 $ROUNDS); do
     IFS=$''
     echo "    # round $ROUND of $ROUNDS"
 cat <<EOF
+  - label: ":darwin: macOS 10.14 - Build"
+    command:
+      - "git clone $BUILDKITE_REPO eos && cd eos &&  git checkout -f $BUILDKITE_COMMIT && git submodule update --init --recursive"
+      - "cd eos && ./.cicd/build.sh"
+      - "cd eos && tar -pczf build.tar.gz build && buildkite-agent artifact upload build.tar.gz"
+    plugins:
+      - EOSIO/anka#v0.6.0:
+          no-volume: true
+          inherit-environment-vars: true
+          vm-name: 10.14.6_6C_14G_40G
+          vm-registry-tag: clean::cicd::git-ssh::nas::brew::buildkite-agent::eos-macos-10.14-pinned-c198989ebf559ded20aa3e656e8a9befa0593296
+          modify-cpu: 12
+          modify-ram: 24
+          always-pull: true
+          debug: true
+          wait-network: true
+          failover-registries:
+            - 'registry_1'
+            - 'registry_2'
+          pre-commands: 
+            - "rm -rf mac-anka-fleet; git clone git@github.com:EOSIO/mac-anka-fleet.git && cd mac-anka-fleet && . ./ensure-tag.bash -u 12 -r 25G -a '-n'"
+      - EOSIO/skip-checkout#v0.1.1:
+          cd: ~
+    env:
+      REPO: git@github.com:EOSIO/eos.git
+      REPO_COMMIT: HEAD
+      TEMPLATE: 10.14.6_6C_14G_40G
+      TEMPLATE_TAG: clean::cicd::git-ssh::nas::brew::buildkite-agent
+      IMAGE_TAG: macos-10.14-pinned
+      PLATFORM_TYPE: pinned
+      TAG_COMMANDS: "git clone git@github.com:EOSIO/eos.git eos && cd eos &&  git checkout -f $BUILDKITE_COMMIT && git submodule update --init --recursive && export IMAGE_TAG=macos-10.14-pinned && export PLATFORM_TYPE=pinned && . ./.cicd/platforms/pinned/macos-10.14-pinned.sh && cd ~/eos && cd .. && rm -rf eos"
+      PROJECT_TAG: eos-macos-10.14-pinned-c198989ebf559ded20aa3e656e8a9befa0593296
+    timeout: 180
+    agents: "queue=mac-anka-large-node-fleet"
+    skip: \${SKIP_BUILD}
+
+  - label: ":darwin: macOS 10.15 - Build"
+    command:
+      - "git clone \$BUILDKITE_REPO eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
+      - "cd eos && ./.cicd/build.sh"
+      - "cd eos && tar -pczf build.tar.gz build && buildkite-agent artifact upload build.tar.gz"
+    plugins:
+      - EOSIO/anka#v0.6.0:
+          no-volume: true
+          inherit-environment-vars: true
+          vm-name: 10.15.4_6C_14G_40G
+          vm-registry-tag: clean::cicd::git-ssh::nas::brew::buildkite-agent::eos-macos-10.15-pinned-cbf68aff3c49d8c672b28157f2433a977a386c81
+          modify-cpu: 12
+          modify-ram: 24
+          always-pull: true
+          debug: true
+          wait-network: true
+          failover-registries:
+            - 'registry_1'
+            - 'registry_2'
+          pre-commands: 
+            - "rm -rf mac-anka-fleet; git clone git@github.com:EOSIO/mac-anka-fleet.git && cd mac-anka-fleet && . ./ensure-tag.bash -u 12 -r 25G -a '-n'"
+      - EOSIO/skip-checkout#v0.1.1:
+          cd: ~
+    env:
+      REPO: git@github.com:EOSIO/eos.git
+      REPO_COMMIT: HEAD
+      TEMPLATE: 10.15.4_6C_14G_40G
+      TEMPLATE_TAG: clean::cicd::git-ssh::nas::brew::buildkite-agent
+      IMAGE_TAG: macos-10.15-pinned
+      PLATFORM_TYPE: pinned
+      TAG_COMMANDS: "git clone git@github.com:EOSIO/eos.git eos && cd eos &&  git checkout -f $BUILDKITE_COMMIT && git submodule update --init --recursive && export IMAGE_TAG=macos-10.15-pinned && export PLATFORM_TYPE=pinned && . ./.cicd/platforms/pinned/macos-10.15-pinned.sh && cd ~/eos && cd .. && rm -rf eos"
+      PROJECT_TAG: eos-macos-10.15-pinned-cbf68aff3c49d8c672b28157f2433a977a386c81
+    timeout: 180
+    agents: "queue=mac-anka-large-node-fleet"
+    skip: \${SKIP_BUILD}
+
+  - wait:
+EOF
+
+cat <<EOF
   - label: ":darwin: macOS 10.15 - ship_test"
     command:
       - "git clone \$BUILDKITE_REPO eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
       - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' --build '137e1830-d0a2-4904-91eb-fc2c567e5bc6' && tar -xzf build.tar.gz"
       - "cd eos && ./.cicd/test.sh scripts/serial-test.sh ship_test"
     plugins:
-      - EOSIO/anka#v0.6.1:
+      - EOSIO/anka#v0.6.0:
           no-volume: true
           inherit-environment-vars: true
           vm-name: 10.15.4_6C_14G_40G
@@ -130,7 +206,6 @@ cat <<EOF
           always-pull: true
           debug: true
           wait-network: true
-          wait-time: true
           failover-registries:
             - 'registry_1'
             - 'registry_2'
@@ -141,7 +216,6 @@ cat <<EOF
       manual:
         permit_on_passed: true
     timeout: 60
-    skip: ${SKIP_MACOS_10_15}
 
 EOF
     IFS=$oIFS
