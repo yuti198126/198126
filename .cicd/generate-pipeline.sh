@@ -118,7 +118,7 @@ for ROUND in $(seq 1 $ROUNDS); do
 cat <<EOF
   - label: ":darwin: macOS 10.14 - Build"
     command:
-      - "git clone $BUILDKITE_REPO eos && cd eos &&  git checkout -f $BUILDKITE_COMMIT && git submodule update --init --recursive"
+      - "git clone \$BUILDKITE_REPO eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
       - "cd eos && ./.cicd/build.sh"
       - "cd eos && tar -pczf build.tar.gz build && buildkite-agent artifact upload build.tar.gz"
     plugins:
@@ -195,7 +195,32 @@ cat <<EOF
   - label: ":darwin: macOS 10.15 - ship_test"
     command:
       - "git clone \$BUILDKITE_REPO eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
-      - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' --build '137e1830-d0a2-4904-91eb-fc2c567e5bc6' && tar -xzf build.tar.gz"
+      - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' && tar -xzf build.tar.gz"
+      - "cd eos && ./.cicd/test.sh scripts/serial-test.sh ship_test"
+    plugins:
+      - EOSIO/anka#v0.6.0:
+          no-volume: true
+          inherit-environment-vars: true
+          vm-name: 10.14.6_6C_14G_40G
+          vm-registry-tag: clean::cicd::git-ssh::nas::brew::buildkite-agent::eos-macos-10.14-pinned-c198989ebf559ded20aa3e656e8a9befa0593296
+          always-pull: true
+          debug: true
+          wait-network: true
+          failover-registries:
+            - 'registry_1'
+            - 'registry_2'
+      - EOSIO/skip-checkout#v0.1.1:
+          cd: ~
+    agents: "queue=mac-anka-test-fleet"
+    retry:
+      manual:
+        permit_on_passed: true
+    timeout: 60
+
+  - label: ":darwin: macOS 10.15 - ship_test"
+    command:
+      - "git clone \$BUILDKITE_REPO eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
+      - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' && tar -xzf build.tar.gz"
       - "cd eos && ./.cicd/test.sh scripts/serial-test.sh ship_test"
     plugins:
       - EOSIO/anka#v0.6.0:
