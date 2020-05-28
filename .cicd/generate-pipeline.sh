@@ -150,7 +150,7 @@ cat <<EOF
       PROJECT_TAG: eos-macos-10.14-pinned-c198989ebf559ded20aa3e656e8a9befa0593296
     timeout: 180
     agents: "queue=mac-anka-large-node-fleet"
-    skip: \${SKIP_BUILD}
+    skip: \${SKIP_10_14}\${SKIP_BUILD}
 
   - label: ":darwin: macOS 10.15 - Build"
     command:
@@ -186,7 +186,7 @@ cat <<EOF
       PROJECT_TAG: eos-macos-10.15-pinned-cbf68aff3c49d8c672b28157f2433a977a386c81
     timeout: 180
     agents: "queue=mac-anka-large-node-fleet"
-    skip: \${SKIP_BUILD}
+    skip: \${SKIP_10_15}\${SKIP_BUILD}
 
   - wait:
 EOF
@@ -216,6 +216,7 @@ cat <<EOF
       manual:
         permit_on_passed: true
     timeout: 60
+    skip: \${SKIP_10_14}
 
   - label: ":darwin: macOS 10.15 - ship_test"
     command:
@@ -241,6 +242,7 @@ cat <<EOF
       manual:
         permit_on_passed: true
     timeout: 60
+    skip: \${SKIP_10_15}
 
 EOF
     IFS=$oIFS
