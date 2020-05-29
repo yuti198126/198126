@@ -133,10 +133,6 @@ cat <<EOF
           failover-registries:
             - 'registry_1'
             - 'registry_2'
-          pre-commands:
-            - "caffeinate -dismu &"
-          post-commands:
-            - "pkill caffeinate"
       - EOSIO/skip-checkout#v0.1.1:
           cd: ~
     agents: "queue=mac-anka-test-fleet"
