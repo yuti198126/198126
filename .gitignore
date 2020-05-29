@@ -47,7 +47,6 @@ libraries/wasm-jit/Source/Programs/Test
 libraries/wasm-jit/Source/Programs/wavm
 
 programs/cleos/cleos
-programs/js_operation_serializer/js_operation_serializer
 programs/data-dir
 programs/eosio-abigen/eosio-abigen
 programs/cleos/config.hpp
