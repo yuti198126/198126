@@ -222,7 +222,7 @@ cat <<EOF
     command:
       - "git clone \$BUILDKITE_REPO eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
       - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' && tar -xzf build.tar.gz"
-      - "cd eos && ./.cicd/test.sh scripts/serial-test.sh ship_test"
+      - "cd eos && caffeinate -dismu ./.cicd/test.sh scripts/serial-test.sh ship_test"
     plugins:
       - EOSIO/anka#v0.6.0:
           no-volume: true
@@ -235,6 +235,10 @@ cat <<EOF
           failover-registries:
             - 'registry_1'
             - 'registry_2'
+          pre-commands:
+            - "caffeinate -dismu &"
+          post-commands:
+            - "pkill caffeinate"
       - EOSIO/skip-checkout#v0.1.1:
           cd: ~
     agents: "queue=mac-anka-test-fleet"
