@@ -119,7 +119,7 @@ cat <<EOF
   - label: ":darwin: macOS 10.15 - ship_test"
     command:
       - "git clone \$BUILDKITE_REPO eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
-      - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' --build '14c9ef65-59c3-4a9d-934f-f80dbcd9a184' && tar -xzf build.tar.gz"
+      - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' --build 'fd96be0f-6562-4500-8c9d-bb7fbb6fdbc6' && tar -xzf build.tar.gz"
       - "cd eos && caffeinate -dismu ./.cicd/test.sh scripts/serial-test.sh ship_test"
     plugins:
       - EOSIO/anka#v0.6.0:
