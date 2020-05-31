@@ -119,7 +119,7 @@ cat <<EOF
   - label: ":darwin: macOS 10.15 - ship_test"
     command:
       - "git clone \$BUILDKITE_REPO eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
-      - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' --build 'fd96be0f-6562-4500-8c9d-bb7fbb6fdbc6' && tar -xzf build.tar.gz"
+      - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' --build 'cadeb08e-f398-4abc-b2a1-2c9904d02529' && tar -xzf build.tar.gz"
       - "cd eos && caffeinate -dismu ./.cicd/test.sh scripts/serial-test.sh ship_test"
     plugins:
       - EOSIO/anka#v0.6.0:
@@ -129,8 +129,6 @@ cat <<EOF
           vm-registry-tag: clean::cicd::git-ssh::nas::brew::buildkite-agent::eos-macos-10.15-pinned-cbf68aff3c49d8c672b28157f2433a977a386c81
           always-pull: true
           debug: true
-          modify-cpu: 12
-          modify-ram: 24
           wait-network: true
           failover-registries:
             - 'registry_1'
