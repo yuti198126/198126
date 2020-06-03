@@ -178,7 +178,7 @@ cat <<EOF
     env:
       REPO: git@github.com:EOSIO/eos.git
       REPO_COMMIT: HEAD
-      TEMPLATE: 10.15.5_6C_14G_40G
+      TEMPLATE: 10.15.5_6C_14G_50G
       TEMPLATE_TAG: clean::cicd::git-ssh::nas::brew::buildkite-agent
       IMAGE_TAG: macos-10.15-pinned
       PLATFORM_TYPE: pinned
