@@ -161,7 +161,7 @@ cat <<EOF
       - EOSIO/anka#v0.6.0:
           no-volume: true
           inherit-environment-vars: true
-          vm-name: 10.15.4_6C_14G_40G
+          vm-name: 10.15.5_6C_14G_50G
           vm-registry-tag: clean::cicd::git-ssh::nas::brew::buildkite-agent::eos-macos-10.15-pinned-cbf68aff3c49d8c672b28157f2433a977a386c81
           modify-cpu: 12
           modify-ram: 24
@@ -227,7 +227,7 @@ cat <<EOF
       - EOSIO/anka#v0.6.0:
           no-volume: true
           inherit-environment-vars: true
-          vm-name: 10.15.4_6C_14G_40G
+          vm-name: 10.15.5_6C_14G_50G
           vm-registry-tag: clean::cicd::git-ssh::nas::brew::buildkite-agent::eos-macos-10.15-pinned-cbf68aff3c49d8c672b28157f2433a977a386c81
           always-pull: true
           debug: true
