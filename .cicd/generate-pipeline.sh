@@ -146,7 +146,7 @@ cat <<EOF
       TEMPLATE_TAG: clean::cicd::git-ssh::nas::brew::buildkite-agent
       IMAGE_TAG: macos-10.14-pinned
       PLATFORM_TYPE: pinned
-      TAG_COMMANDS: "git clone git@github.com:EOSIO/eos.git eos && cd eos &&  git checkout -f $BUILDKITE_COMMIT && git submodule update --init --recursive && export IMAGE_TAG=macos-10.14-pinned && export PLATFORM_TYPE=pinned && . ./.cicd/platforms/pinned/macos-10.14-pinned.sh && cd ~/eos && cd .. && rm -rf eos"
+      TAG_COMMANDS: "git clone git@github.com:EOSIO/eos.git eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive && export IMAGE_TAG=macos-10.14-pinned && export PLATFORM_TYPE=pinned && . ./.cicd/platforms/pinned/macos-10.14-pinned.sh && cd ~/eos && cd .. && rm -rf eos"
       PROJECT_TAG: eos-macos-10.14-pinned-c198989ebf559ded20aa3e656e8a9befa0593296
     timeout: 180
     agents: "queue=mac-anka-large-node-fleet"
@@ -182,7 +182,7 @@ cat <<EOF
       TEMPLATE_TAG: clean::cicd::git-ssh::nas::brew::buildkite-agent
       IMAGE_TAG: macos-10.15-pinned
       PLATFORM_TYPE: pinned
-      TAG_COMMANDS: "git clone git@github.com:EOSIO/eos.git eos && cd eos &&  git checkout -f $BUILDKITE_COMMIT && git submodule update --init --recursive && export IMAGE_TAG=macos-10.15-pinned && export PLATFORM_TYPE=pinned && . ./.cicd/platforms/pinned/macos-10.15-pinned.sh && cd ~/eos && cd .. && rm -rf eos"
+      TAG_COMMANDS: "git clone git@github.com:EOSIO/eos.git eos && cd eos &&  git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive && export IMAGE_TAG=macos-10.15-pinned && export PLATFORM_TYPE=pinned && . ./.cicd/platforms/pinned/macos-10.15-pinned.sh && cd ~/eos && cd .. && rm -rf eos"
       PROJECT_TAG: eos-macos-10.15-pinned-cbf68aff3c49d8c672b28157f2433a977a386c81
     timeout: 180
     agents: "queue=mac-anka-large-node-fleet"
