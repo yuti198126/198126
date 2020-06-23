@@ -26,7 +26,7 @@ public:
    /// @param on_err callback for errors, called from amqp thread, can be nullptr
    /// @param on_consume callback for consume on routing key name, called from amqp thread, null if no consume needed
    amqp( const std::string& address, std::string name, on_error_t on_err, on_consume_t on_consume = nullptr )
-         : thread_pool_( "ampq", 1) // amqp is not thread safe, use only one thread
+         : thread_pool_( "ampq", 3) // amqp is not thread safe, use only one thread
          , name_( std::move( name ) )
          , on_error_( std::move( on_err ) )
          , on_consume_( std::move( on_consume ) )
@@ -48,10 +48,11 @@ public:
 
    /// publish to AMQP address with routing key name
    void publish( std::string exchange, std::string correlation_id, std::vector<char> buf ) {
-      boost::asio::post( *handler_->amqp_strand(),
+      boost::asio::post( thread_pool_.get_executor(),
             [my=this, exchange=std::move(exchange), cid=std::move(correlation_id), buf=std::move(buf)]() {
                AMQP::Envelope env( buf.data(), buf.size() );
                env.setCorrelationID( cid );
+               std::lock_guard g(my->mtx_);
                my->channel_->publish( exchange, my->name_, env, 0 );
       } );
    }
@@ -59,11 +60,12 @@ public:
    /// publish to AMQP calling f() -> std::vector<char> on amqp thread
    template<typename Func>
    void publish( std::string exchange, std::string correlation_id, Func f ) {
-      boost::asio::post( *handler_->amqp_strand(),
+      boost::asio::post( thread_pool_.get_executor(),
             [my=this, exchange=std::move(exchange), cid=std::move(correlation_id), f=std::move(f)]() {
                std::vector<char> buf = f();
                AMQP::Envelope env( buf.data(), buf.size() );
                env.setCorrelationID( cid );
+               std::lock_guard g(my->mtx_);
                my->channel_->publish( exchange, my->name_, env, 0 );
       } );
    }
@@ -71,7 +73,9 @@ public:
    /// Explicitly stop thread pool execution
    /// do not call from lambda's passed to publish or constructor e.g. on_error
    void stop() {
+      std::unique_lock g(mtx_);
       if( handler_ ) {
+         g.unlock();
          // drain amqp queue
          std::promise<void> stop_promise;
          boost::asio::post( *handler_->amqp_strand(), [&]() {
@@ -80,6 +84,7 @@ public:
          stop_promise.get_future().wait();
 
          thread_pool_.stop();
+         g.lock();
          handler_.reset();
       }
    }
@@ -120,6 +125,7 @@ private:
       } );
       consumer.onReceived( [&](const AMQP::Message& message, uint64_t delivery_tag, bool redelivered) {
          bool r = on_consume_( message.body(), message.bodySize() );
+         std::lock_guard g(mtx_);
          if( r ) {
             channel_->ack( delivery_tag );
          } else {
@@ -169,6 +175,7 @@ private:
 
 private:
    eosio::chain::named_thread_pool thread_pool_;
+   std::mutex mtx_;
    std::unique_ptr<amqp_handler> handler_;
    std::unique_ptr<AMQP::TcpConnection> connection_;
    std::unique_ptr<AMQP::TcpChannel> channel_;
