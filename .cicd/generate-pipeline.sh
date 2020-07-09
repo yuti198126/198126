@@ -146,8 +146,6 @@ EOF
           inherit-environment-vars: true
           vm-name: $(echo "$PLATFORM_JSON" | jq -r .ANKA_TEMPLATE_NAME)
           vm-registry-tag: $(echo "$PLATFORM_JSON" | jq -r .ANKA_TAG_BASE)::$(echo "$PLATFORM_JSON" | jq -r .HASHED_IMAGE_TAG)
-          modify-cpu: 6 --htt
-          modify-ram: 24 --htt
           always-pull: true
           debug: true
           wait-network: true
