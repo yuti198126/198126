@@ -25,7 +25,7 @@ steps:
     
   - label: ":darwin: macOS 10.14 - Base Image Pinned"
     command:
-      - "git clone git@github.com:EOSIO/eos.git eos && cd eos && git checkout -f $BUILDKITE_BRANCH"
+      - "git clone $BUILDKITE_REPO eos && cd eos && git checkout -f $BUILDKITE_BRANCH"
       - "cd eos && ./.cicd/platforms/pinned/macos-10.14-pinned.sh"
     plugins:
       - EOSIO/anka#v0.6.1:
@@ -46,7 +46,7 @@ steps:
 
   - label: ":darwin: macOS 10.15 - Base Image Pinned"
     command:
-      - "git clone git@github.com:EOSIO/eos.git eos && cd eos && git checkout -f $BUILDKITE_BRANCH"
+      - "git clone $BUILDKITE_REPO eos && cd eos && git checkout -f $BUILDKITE_BRANCH"
       - "cd eos && ./.cicd/platforms/pinned/macos-10.15-pinned.sh"
     plugins:
       - EOSIO/anka#v0.6.1:
@@ -111,7 +111,7 @@ steps:
     
   - label: ":darwin: macOS 10.14 - Base Image Unpinned"
     command:
-      - "git clone git@github.com:EOSIO/eos.git eos && cd eos && git checkout -f $BUILDKITE_BRANCH"
+      - "git clone $BUILDKITE_REPO eos && cd eos && git checkout -f $BUILDKITE_BRANCH"
       - "cd eos && ./.cicd/platforms/unpinned/macos-10.14-unpinned.sh"
     plugins:
       - EOSIO/anka#v0.6.1:
@@ -132,7 +132,7 @@ steps:
 
   - label: ":darwin: macOS 10.15 - Base Image Unpinned"
     command:
-      - "git clone git@github.com:EOSIO/eos.git eos && cd eos && git checkout -f $BUILDKITE_BRANCH"
+      - "git clone $BUILDKITE_REPO eos && cd eos && git checkout -f $BUILDKITE_BRANCH"
       - "cd eos && ./.cicd/platforms/unpinned/macos-10.15-unpinned.sh"
     plugins:
       - EOSIO/anka#v0.6.1:
