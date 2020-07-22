@@ -51,7 +51,7 @@ steps:
     plugins:
       - EOSIO/anka#v0.6.1:
           debug: true
-          vm-name: "10.15.5_6C_14G_80G"
+          vm-name: "10.15.6_6C_14G_80G"
           no-volume: true
           always-pull: true
           wait-network: true
@@ -137,7 +137,7 @@ steps:
     plugins:
       - EOSIO/anka#v0.6.1:
           debug: true
-          vm-name: "10.15.5_6C_14G_80G"
+          vm-name: "10.15.6_6C_14G_80G"
           no-volume: true
           always-pull: true
           wait-network: true
