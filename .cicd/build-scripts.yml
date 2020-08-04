@@ -24,12 +24,12 @@ steps:
     
   - label: ":darwin: macOS 10.14 - Build Pinned"
     env:
-      REPO: "git@github.com:EOSIO/eos.git"
+      REPO: "$BUILDKITE_REPO"
       TEMPLATE: "10.14.6_6C_14G_80G"
       TEMPLATE_TAG: "clean::cicd::git-ssh::nas::brew::buildkite-agent"
     agents: "queue=mac-anka-large-node-fleet"
     command:
-      - "git clone git@github.com:EOSIO/eos.git eos && cd eos && git checkout -f $BUILDKITE_BRANCH && git submodule update --init --recursive"
+      - "git clone $BUILDKITE_REPO eos && cd eos && git checkout -f $BUILDKITE_BRANCH && git submodule update --init --recursive"
       - "cd eos && ./scripts/eosio_build.sh -P -y"
     plugins:
       - EOSIO/anka#v0.6.1:
@@ -97,12 +97,12 @@ steps:
     
   - label: ":darwin: macOS 10.14 - Build UnPinned"
     env:
-      REPO: "git@github.com:EOSIO/eos.git"
+      REPO: "$BUILDKITE_REPO"
       TEMPLATE: "10.14.6_6C_14G_80G"
       TEMPLATE_TAG: "clean::cicd::git-ssh::nas::brew::buildkite-agent"
     agents: "queue=mac-anka-large-node-fleet"
     command:
-      - "git clone git@github.com:EOSIO/eos.git eos && cd eos &&  git checkout -f $BUILDKITE_BRANCH && git submodule update --init --recursive"
+      - "git clone $BUILDKITE_REPO eos && cd eos &&  git checkout -f $BUILDKITE_BRANCH && git submodule update --init --recursive"
       - "cd eos && ./scripts/eosio_build.sh -y"
     plugins:
       - EOSIO/anka#v0.6.1:
