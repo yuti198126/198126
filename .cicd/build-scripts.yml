@@ -53,7 +53,7 @@ steps:
   - label: ":darwin: macOS 10.15 - Build Pinned"
     env:
       REPO: "$BUILDKITE_REPO"
-      TEMPLATE: "10.15.6_6C_14G_80G"
+      TEMPLATE: "10.15.6_3C_14G_80G"
       TEMPLATE_TAG: "clean::cicd::git-ssh::nas::brew::buildkite-agent"
     agents: "queue=mac-anka-large-node-fleet"
     command:
@@ -62,10 +62,8 @@ steps:
     plugins:
       - EOSIO/anka#v0.6.1:
           debug: true
-          vm-name: "10.15.6_6C_14G_80G"
+          vm-name: "10.15.6_3C_14G_80G"
           no-volume: true
-          modify-cpu: 12
-          modify-ram: 24
           always-pull: true
           wait-network: true
           vm-registry-tag: "clean::cicd::git-ssh::nas::brew::buildkite-agent"
@@ -155,7 +153,7 @@ steps:
   - label: ":darwin: macOS 10.15 - Build UnPinned"
     env:
       REPO: "$BUILDKITE_REPO"
-      TEMPLATE: "10.15.6_6C_14G_80G"
+      TEMPLATE: "10.15.6_3C_14G_80G"
       TEMPLATE_TAG: "clean::cicd::git-ssh::nas::brew::buildkite-agent"
     agents: "queue=mac-anka-large-node-fleet"
     command:
@@ -164,10 +162,8 @@ steps:
     plugins:
       - EOSIO/anka#v0.6.1:
           debug: true
-          vm-name: "10.15.6_6C_14G_80G"
+          vm-name: "10.15.6_3C_14G_80G"
           no-volume: true
-          modify-cpu: 12
-          modify-ram: 24
           always-pull: true
           wait-network: true
           vm-registry-tag: "clean::cicd::git-ssh::nas::brew::buildkite-agent"
