@@ -65,7 +65,7 @@ for FILE in $(ls $CICD_DIR/platforms/$PLATFORM_TYPE); do
     if [[ $FILE_NAME =~ 'macos-10.14' ]]; then
       export ANKA_TEMPLATE_NAME='10.14.6_6C_14G_80G'
     elif [[ $FILE_NAME =~ 'macos-10.15' ]]; then
-      export ANKA_TEMPLATE_NAME='10.15.6_6C_14G_80G'
+      export ANKA_TEMPLATE_NAME='10.15.6_3C_14G_80G'
     else # Linux
       export ANKA_TAG_BASE=''
       export ANKA_TEMPLATE_NAME=''
@@ -137,8 +137,6 @@ EOF
           inherit-environment-vars: true
           vm-name: $(echo "$PLATFORM_JSON" | jq -r .ANKA_TEMPLATE_NAME)
           vm-registry-tag: $(echo "$PLATFORM_JSON" | jq -r .ANKA_TAG_BASE)::$(echo "$PLATFORM_JSON" | jq -r .HASHED_IMAGE_TAG)
-          modify-cpu: 12
-          modify-ram: 24
           always-pull: true
           debug: true
           wait-network: true
@@ -146,7 +144,7 @@ EOF
             - 'registry_1'
             - 'registry_2'
           pre-commands: 
-            - "rm -rf mac-anka-fleet; git clone https://github.com/EOSIO/mac-anka-fleet.git && cd mac-anka-fleet && . ./ensure-tag.bash -u 12 -r 25G -a '-n'"
+            - "rm -rf mac-anka-fleet; git clone https://github.com/EOSIO/mac-anka-fleet.git && cd mac-anka-fleet && . ./ensure-tag.bash -a '-n'"
       - EOSIO/skip-checkout#v0.1.1:
           cd: ~
     env:
@@ -590,7 +588,7 @@ cat <<EOF
       - EOSIO/anka#v0.6.1:
           no-volume: true
           inherit-environment-vars: true
-          vm-name: 10.15.6_6C_14G_80G
+          vm-name: 10.15.6_3C_14G_80G
           vm-registry-tag: "clean::cicd::git-ssh::nas::brew::buildkite-agent"
           always-pull: true
           debug: true
