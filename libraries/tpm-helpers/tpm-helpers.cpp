@@ -246,10 +246,7 @@ std::map<fc::crypto::public_key, TPM2_HANDLE> usable_persistent_keys_and_handles
 }
 
 struct tpm_key::impl {
-   impl(const std::string& tcti, const fc::crypto::public_key& pubkey, const std::vector<unsigned>& pcrs) : pubkey(pubkey), esys_ctx(tcti) {
-      if(pcrs.size())
-         session.emplace(esys_ctx, pcrs);
-   }
+   impl(const std::string& tcti, const fc::crypto::public_key& pubkey, const std::vector<unsigned>& pcrs) : pubkey(pubkey), esys_ctx(tcti), pcrs(pcrs) {}
 
    ~impl() {
       if(key_object != ESYS_TR_NONE)
@@ -260,7 +257,7 @@ struct tpm_key::impl {
    fc::ec_key sslkey = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
    fc::crypto::public_key pubkey;
    esys_context esys_ctx;
-   std::optional<session_with_pcr_policy> session;
+   std::vector<unsigned> pcrs;
 };
 
 tpm_key::tpm_key(const std::string& tcti, const fc::crypto::public_key& pubkey, const std::vector<unsigned>& pcrs) : my(tcti, pubkey, pcrs) {
@@ -280,8 +277,12 @@ fc::crypto::signature tpm_key::sign(const fc::sha256& digest) {
    scheme.details.ecdsa.hashAlg = TPM2_ALG_SHA256;
    TPMT_TK_HASHCHECK validation = {TPM2_ST_HASHCHECK, TPM2_RH_NULL};
 
+   std::optional<session_with_pcr_policy> session;
+   if(my->pcrs.size())
+      session.emplace(my->esys_ctx, my->pcrs);
+
    TPMT_SIGNATURE* sig;
-   TSS2_RC rc = Esys_Sign(my->esys_ctx.ctx(), my->key_object, my->session ? my->session->session() : ESYS_TR_PASSWORD, ESYS_TR_NONE, ESYS_TR_NONE, &d, &scheme, &validation, &sig);
+   TSS2_RC rc = Esys_Sign(my->esys_ctx.ctx(), my->key_object, session ? session->session() : ESYS_TR_PASSWORD, ESYS_TR_NONE, ESYS_TR_NONE, &d, &scheme, &validation, &sig);
    FC_ASSERT(!rc, "Failed TPM sign on key ${k}: ${m}", ("k", my->pubkey)("m", Tss2_RC_Decode(rc)));
    auto cleanup_sig = fc::make_scoped_exit([&]() {free(sig);});
    FC_ASSERT(sig->signature.ecdsa.signatureR.size == 32 && sig->signature.ecdsa.signatureS.size == 32, "Signature size from TPM not as expected");
