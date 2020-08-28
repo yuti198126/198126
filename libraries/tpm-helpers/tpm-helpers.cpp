@@ -4,10 +4,10 @@
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm/copy.hpp>
 
+extern "C" {
 #include <tss2_esys.h>
 #include <tss2_rc.h>
 #include <tss2_mu.h>
-extern "C" {
 #include <tss2_tctildr.h>
 }
 
