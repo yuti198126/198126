@@ -46,10 +46,21 @@ class signature_provider_plugin_impl {
 
 #ifdef ENABLE_TPM
       signature_provider_plugin::signature_provider_type
-      make_tpm_signature_provider(const std::string& tcti, const chain::public_key_type pubkey) const {
-         std::shared_ptr<eosio::tpm::tpm_key> tpmkey = std::make_shared<eosio::tpm::tpm_key>(tcti, pubkey);
+      make_tpm_signature_provider(const std::string& spec_data, const chain::public_key_type pubkey) const {
+         std::vector<string> params;
+         std::vector<unsigned> pcrs;
+
+         boost::split(params,spec_data,boost::is_any_of("="));
+         if(params.size() >= 2) {
+            vector<string> pcr_strs;
+            boost::split(pcr_strs,params[1],boost::is_any_of(","));
+            for(const auto& ps : pcr_strs)
+               pcrs.emplace_back(std::stoi(ps));
+         }
+
+         std::shared_ptr<eosio::tpm::tpm_key> tpmkey = std::make_shared<eosio::tpm::tpm_key>(params[0], pubkey, pcrs);
          return [tpmkey](const chain::digest_type& digest) {
-            return tpmkey->sign_digest(digest);
+            return tpmkey->sign(digest);
          };
       }
 #endif

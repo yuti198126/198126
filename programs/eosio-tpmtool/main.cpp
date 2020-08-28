@@ -11,14 +11,18 @@ int main(int argc, char** argv) {
 
    bool help = false, list = false, create = false;
    std::string tcti;
+   std::vector<unsigned> pcrs;
 
    cli.add_options()
       ("help,h", bpo::bool_switch(&help)->default_value(false), "Print this help message and exit.")
-      ("list,l", bpo::bool_switch(&list)->default_value(false), "List persistent TPM keys useable for EOSIO.")
-      ("create,c", bpo::bool_switch(&create)->default_value(false), "Create Secure Enclave key.")
+      ("list,l", bpo::bool_switch(&list)->default_value(false), "List persistent TPM keys usable for EOSIO.")
+      ("create,c", bpo::bool_switch(&create)->default_value(false), "Create persistent TPM key.")
       ("tcti,T", bpo::value<std::string>()->notifier([&](const std::string& s) {
          tcti = s;
-      }), "Specify tcti and tcti options")
+      }), "Specify tcti and tcti options.")
+      ("pcr,p", bpo::value<std::vector<unsigned>>()->composing()->notifier([&](const std::vector<unsigned>& p) {
+         pcrs = p;
+      }), "Add a PCR value to the policy of the created key. May be specified multiple times.")
       ;
    bpo::variables_map varmap;
    try {
@@ -42,12 +46,16 @@ int main(int argc, char** argv) {
       return 1;
    }
 
-//   if(create)
-//      std::cout << eosio::secure_enclave::create_key().public_key().to_string() << std::endl;
+   try {
+      if(create)
+         std::cout << eosio::tpm::create_key(tcti, pcrs).to_string() << std::endl;
 
-   if(list)
-      for(const auto& k : eosio::tpm::get_all_persistent_keys(tcti))
-         std::cout << k.to_string() << std::endl;
+      if(list)
+         for(const auto& k : eosio::tpm::get_all_persistent_keys(tcti))
+            std::cout << k.to_string() << std::endl;
 
-   return 0;
+      return 0;
+   } FC_LOG_AND_DROP();
+
+   return 1;
 }
