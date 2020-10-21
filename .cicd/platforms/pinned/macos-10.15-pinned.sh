@@ -1,7 +1,6 @@
 #!/bin/bash
 set -eo pipefail
 VERSION=1
-echo "Test this thing."
 export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 brew update
 brew install git cmake python libtool libusb graphviz automake wget gmp pkgconfig doxygen openssl jq || :
