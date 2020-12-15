@@ -28,3 +28,6 @@
 [submodule "libraries/yubihsm/upstream"]
 	path = libraries/yubihsm/upstream
 	url = https://github.com/Yubico/yubihsm-shell
+[submodule "libraries/libpqxx"]
+	path = libraries/libpqxx
+	url = https://github.com/jtv/libpqxx
