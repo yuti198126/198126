@@ -32,7 +32,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/contracts.hpp.in ${CMAKE_CURRENT_BINA
 add_subdirectory(snapshots)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/snapshots.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/snapshots.hpp ESCAPE_QUOTES)
 
-add_subdirectory(state-history-data)
+file(COPY state-history-data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/utilities.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/utilities.hpp ESCAPE_QUOTES)
 
 add_custom_command(

@@ -238,6 +238,29 @@ BOOST_AUTO_TEST_CASE(test_trace_log_versions) {
    }
 }
 
+BOOST_AUTO_TEST_CASE(test_mainnet_traces) {  
+   namespace bfs = boost::filesystem;
+   bfs::path p (state_history_data_base_path() + "/verification_traces");
+
+   bfs::directory_iterator end_itr;
+
+   // cycle through the directory
+   for (bfs::directory_iterator itr(p); itr != end_itr; ++itr) {
+      // If it's not a directory, list it. If you want to list directories too, just remove this check.
+      if (is_regular_file(itr->path())) {
+         fc::datastream<fc::cfile> ds;
+         ds.set_file_path(itr->path().string());
+         ds.open("rb");
+         std::vector<eosio::state_history::transaction_trace> traces;
+         BOOST_TEST_CONTEXT("With the trace file " << itr->path().string()) {
+            BOOST_CHECK_NO_THROW(eosio::state_history::trace_converter::unpack(ds, traces));
+            BOOST_CHECK(traces.size() > 0);
+            BOOST_CHECK_NO_THROW(fc::raw::pack(traces));
+         }
+      }
+   }
+}
+
 BOOST_AUTO_TEST_CASE(test_chain_state_log) {
 
    namespace bfs = boost::filesystem;
