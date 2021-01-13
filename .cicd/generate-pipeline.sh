@@ -419,7 +419,7 @@ if [[ ! "$PINNED" == 'false' || "$SKIP_MULTIVERSION_TEST" == 'false' ]]; then
       PLATFORM_TYPE: "pinned"
     agents:
       queue: "$BUILDKITE_TEST_AGENT_QUEUE"
-    timeout: ${TIMEOUT:-30}
+    timeout: ${TIMEOUT:-120}
     skip: ${SKIP_LINUX}${SKIP_UBUNTU_18_04}${SKIP_MULTIVERSION_TEST}
 
 EOF
