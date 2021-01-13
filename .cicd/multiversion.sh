@@ -45,6 +45,7 @@ eval $DOWNLOAD_COMMAND
 cd "$GIT_ROOT"
 cp "$GIT_ROOT/tests/multiversion_paths.conf" "$GIT_ROOT/build/tests"
 cd "$GIT_ROOT/build"
+sleep 7200
 # count tests
 echo "+++ $([[ "$BUILDKITE" == 'true' ]] && echo ':microscope: ')Running Multiversion Test"
 TEST_COUNT=$(ctest -N -L mixed_version_tests | grep -i 'Total Tests: ' | cut -d ':' -f 2 | awk '{print $1}')
