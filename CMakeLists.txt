@@ -64,6 +64,10 @@ if(APPLE AND UNIX AND "${OPENSSL_ROOT_DIR}" STREQUAL "")
    set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl@1.1")
 endif()
 
+if(APPLE AND UNIX)
+   set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};/usr/local/opt/libpq")
+endif()
+
 # WASM runtimes to enable. Each runtime in this list will have:
 #  * definition EOSIO_<RUNTIME>_RUNTIME_ENABLED defined in public libchain interface
 #  * ctest entries with --runtime

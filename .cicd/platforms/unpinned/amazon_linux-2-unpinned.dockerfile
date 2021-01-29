@@ -22,17 +22,10 @@ RUN curl -LO https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.
     ./b2 --with-iostreams --with-date_time --with-filesystem --with-system --with-program_options --with-chrono --with-test -q -j$(nproc) install && \
     cd / && \
     rm -rf boost_1_71_0.tar.bz2 /boost_1_71_0
-#install libpq
+#install postgresql libraries
 RUN amazon-linux-extras enable postgresql11 && \
-    yum install -y libpq-devel postgresql-server && \
+    yum install -y libpq-devel postgresql-server postgresql-server-devel && \
     yum clean all && rm -rf /var/cache/yum
-#build libpqxx
-RUN curl -L https://github.com/jtv/libpqxx/archive/7.2.1.tar.gz | tar zxvf - && \
-    cd  libpqxx-7.2.1  && \
-    cmake -DSKIP_BUILD_TEST=ON -DPostgreSQL_TYPE_INCLUDE_DIR=/usr/include/libpq -DCMAKE_BUILD_TYPE=Release -S . -B build && \
-    cmake --build build && cmake --install build && \
-    cd .. && rm -rf libpqxx-7.2.1
-ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig
 # install nvm
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
 # load nvm in non-interactive shells
