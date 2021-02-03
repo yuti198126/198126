@@ -140,7 +140,7 @@ EOF
       - "git clone \$BUILDKITE_REPO eos && cd eos && $GIT_FETCH git checkout -f \$BUILDKITE_COMMIT && git submodule update --init --recursive"
       - "cd eos && ./.cicd/build.sh"
     plugins:
-      - EOSIO/anka#v0.6.1:
+      - EOSIO/anka#v0.7.0:
           no-volume: true
           inherit-environment-vars: true
           vm-name: $(echo "$PLATFORM_JSON" | jq -r .ANKA_TEMPLATE_NAME)
@@ -224,7 +224,7 @@ EOF
       - "cd eos && buildkite-agent artifact download build.tar.gz . --step '$(echo "$PLATFORM_JSON" | jq -r .ICON) $(echo "$PLATFORM_JSON" | jq -r .PLATFORM_NAME_FULL) - Build' && tar -xzf build.tar.gz"
       - "cd eos && ./.cicd/test.sh scripts/parallel-test.sh"
     plugins:
-      - EOSIO/anka#v0.6.1:
+      - EOSIO/anka#v0.7.0:
           no-volume: true
           inherit-environment-vars: true
           vm-name: $(echo "$PLATFORM_JSON" | jq -r .ANKA_TEMPLATE_NAME)
@@ -277,7 +277,7 @@ EOF
       - "cd eos && buildkite-agent artifact download build.tar.gz . --step '$(echo "$PLATFORM_JSON" | jq -r .ICON) $(echo "$PLATFORM_JSON" | jq -r .PLATFORM_NAME_FULL) - Build' && tar -xzf build.tar.gz"
       - "cd eos && ./.cicd/test.sh scripts/wasm-spec-test.sh"
     plugins:
-      - EOSIO/anka#v0.6.1:
+      - EOSIO/anka#v0.7.0:
           no-volume: true
           inherit-environment-vars: true
           vm-name: $(echo "$PLATFORM_JSON" | jq -r .ANKA_TEMPLATE_NAME)
@@ -333,7 +333,7 @@ EOF
       - "cd eos && buildkite-agent artifact download build.tar.gz . --step '$(echo "$PLATFORM_JSON" | jq -r .ICON) $(echo "$PLATFORM_JSON" | jq -r .PLATFORM_NAME_FULL) - Build' && tar -xzf build.tar.gz"
       - "cd eos && ./.cicd/test.sh scripts/serial-test.sh $TEST_NAME"
     plugins:
-      - EOSIO/anka#v0.6.1:
+      - EOSIO/anka#v0.7.0:
           no-volume: true
           inherit-environment-vars: true
           vm-name: $(echo "$PLATFORM_JSON" | jq -r .ANKA_TEMPLATE_NAME)
@@ -391,7 +391,7 @@ EOF
       - "cd eos && buildkite-agent artifact download build.tar.gz . --step '$(echo "$PLATFORM_JSON" | jq -r .ICON) $(echo "$PLATFORM_JSON" | jq -r .PLATFORM_NAME_FULL) - Build' ${BUILD_SOURCE} && tar -xzf build.tar.gz"
       - "cd eos && ./.cicd/test.sh scripts/long-running-test.sh $TEST_NAME"
     plugins:
-      - EOSIO/anka#v0.6.1:
+      - EOSIO/anka#v0.7.0:
           no-volume: true
           inherit-environment-vars: true
           vm-name: $(echo "$PLATFORM_JSON" | jq -r .ANKA_TEMPLATE_NAME)
@@ -605,7 +605,7 @@ cat <<EOF
       - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.14 - Build' && tar -xzf build.tar.gz"
       - "cd eos && ./.cicd/package.sh"
     plugins:
-      - EOSIO/anka#v0.6.1:
+      - EOSIO/anka#v0.7.0:
           no-volume: true
           inherit-environment-vars: true
           vm-name: 10.14.6_6C_14G_80G
@@ -629,7 +629,7 @@ cat <<EOF
       - "cd eos && buildkite-agent artifact download build.tar.gz . --step ':darwin: macOS 10.15 - Build' && tar -xzf build.tar.gz"
       - "cd eos && ./.cicd/package.sh"
     plugins:
-      - EOSIO/anka#v0.6.1:
+      - EOSIO/anka#v0.7.0:
           no-volume: true
           inherit-environment-vars: true
           vm-name: 10.15.5_6C_14G_80G
