@@ -40,10 +40,7 @@
         "test":
         [
             {
-                "tag": "v2.0.0-rc2"
-            },
-            {
-                "tag": "v2.0.0-rc3"
+                "commit": "58f90b9666dc37cf35eac5dafb6db1c4138024e7"
             }
         ]
     }
