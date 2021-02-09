@@ -151,6 +151,16 @@ class db_key_value_iter_store {
          }
          std::memcpy(result->value->data(), data, size);
       }
+
+      int highest_iterator() const {
+         return _iterator_to_object.size() - 1;
+      }
+      bool deleted_iterator(int iterator) const {
+         validate_object_iterator(iterator, "dereference of end iterator");
+         // grab a const ref, to ensure that we are returning a reference to the actual object in the vector
+         const auto& result = _iterator_to_object[iterator];
+         return !result;
+      }
    private:
       void validate_object_iterator(int iterator, const char* explanation_for_no_end_iterators) const {
          EOS_ASSERT( iterator != invalid_iterator(), invalid_table_iterator, "invalid iterator" );

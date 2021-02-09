@@ -149,13 +149,12 @@ namespace eosio { namespace chain { namespace backing_store {
       enum class comp { equals, gte, gt};
       int32_t find_i64(name code, name scope, name table, uint64_t id, comp comparison);
 
-      void print(int iterator, const char* func, const char* desc) {
+      void print(int iterator, const char* func, const char* desc, bool print_all_iters = true) {
          if (track) {
             if (iterator == primary_iter_store.invalid_iterator()) {
                ilog("${func} ${desc} invalid iterator",("func",func)("desc",desc));
-               return;
             }
-            if (iterator < primary_iter_store.invalid_iterator()) {
+            else if (iterator < primary_iter_store.invalid_iterator()) {
                const backing_store::unique_table* table_store = primary_iter_store.find_table_by_end_iterator(iterator);
                if (table_store == nullptr) {
                   ilog("${func} ${desc} invalid table end iterator: ${tei}",("func",func)("desc",desc)("tei",iterator));
@@ -166,28 +165,41 @@ namespace eosio { namespace chain { namespace backing_store {
                      ("code",table_store->contract.to_string())("scope",table_store->scope.to_string())("table", table_store->table.to_string())
                      ("tei",iterator));
                }
-               return;
-            }
-            const auto& key_store = primary_iter_store.get(iterator);
-            const auto& table_store = primary_iter_store.get_table(key_store);
-            if (!key_store.value) {
-               ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, NO DATA",
-                  ("func",func)("desc",desc)
-                  ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
-                  ("tei",key_store.table_ei)("iter",iterator));
-            }
-            else if (!key_store.value->size()) {
-               ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, EMPTY DATA",
-                  ("func",func)("desc",desc)
-                  ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
-                  ("tei",key_store.table_ei)("iter",iterator));
             }
             else {
-               ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, value_size: ${vs}, data: ${data}",
-                  ("func",func)("desc",desc)
-                  ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
-                  ("tei",key_store.table_ei)("iter",iterator)
-                  ("vs", key_store.value->size())("data",std::string(key_store.value->data(),key_store.value->size())));
+               const auto& key_store = primary_iter_store.get(iterator);
+               const auto& table_store = primary_iter_store.get_table(key_store);
+               if (!key_store.value) {
+                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, NO DATA",
+                     ("func",func)("desc",desc)
+                     ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
+                     ("tei",key_store.table_ei)("iter",iterator));
+               }
+               else if (!key_store.value->size()) {
+                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, EMPTY DATA",
+                     ("func",func)("desc",desc)
+                     ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
+                     ("tei",key_store.table_ei)("iter",iterator));
+               }
+               else {
+                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, value_size: ${vs}, data: ${data}",
+                     ("func",func)("desc",desc)
+                     ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
+                     ("tei",key_store.table_ei)("iter",iterator)
+                     ("vs", key_store.value->size())("data",std::string(key_store.value->data(),key_store.value->size())));
+               }
+            }
+            if (print_all_iters) {
+               const auto highest_itr = primary_iter_store.highest_iterator();
+               for (int other_itr = 0; other_itr <= highest_itr; ++other_itr) {
+                  if (other_itr == iterator)
+                     continue;
+                  if (primary_iter_store.deleted_iterator(other_itr)) {
+                     ilog("iter: ${iter} deleted",("iter",other_itr));
+                     continue;
+                  }
+                  print(other_itr, func, desc, false);
+               }
             }
          }
       }
