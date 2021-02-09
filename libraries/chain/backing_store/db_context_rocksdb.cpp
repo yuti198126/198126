@@ -149,6 +149,49 @@ namespace eosio { namespace chain { namespace backing_store {
       enum class comp { equals, gte, gt};
       int32_t find_i64(name code, name scope, name table, uint64_t id, comp comparison);
 
+      void print(int iterator, const char* func, const char* desc) {
+         if (track) {
+            if (iterator == primary_iter_store.invalid_iterator()) {
+               ilog("${func} ${desc} invalid iterator",("func",func)("desc",desc));
+               return;
+            }
+            if (iterator < primary_iter_store.invalid_iterator()) {
+               const backing_store::unique_table* table_store = primary_iter_store.find_table_by_end_iterator(iterator);
+               if (table_store == nullptr) {
+                  ilog("${func} ${desc} invalid table end iterator: ${tei}",("func",func)("desc",desc)("tei",iterator));
+               }
+               else {
+                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, table_ei: ${tei}",
+                     ("func",func)("desc",desc)
+                     ("code",table_store->contract.to_string())("scope",table_store->scope.to_string())("table", table_store->table.to_string())
+                     ("tei",iterator));
+               }
+               return;
+            }
+            const auto& key_store = primary_iter_store.get(iterator);
+            const auto& table_store = primary_iter_store.get_table(key_store);
+            if (!key_store.value) {
+               ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, NO DATA",
+                  ("func",func)("desc",desc)
+                  ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
+                  ("tei",key_store.table_ei)("iter",iterator));
+            }
+            else if (!key_store.value->size()) {
+               ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, EMPTY DATA",
+                  ("func",func)("desc",desc)
+                  ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
+                  ("tei",key_store.table_ei)("iter",iterator));
+            }
+            else {
+               ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, value_size: ${vs}, data: ${data}",
+                  ("func",func)("desc",desc)
+                  ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
+                  ("tei",key_store.table_ei)("iter",iterator)
+                  ("vs", key_store.value->size())("data",std::string(key_store.value->data(),key_store.value->size())));
+            }
+         }
+      }
+
       using uint128_t = eosio::chain::uint128_t;
       using key256_t = eosio::chain::key256_t;
       session_variant_type                 current_session;
@@ -202,6 +245,7 @@ namespace eosio { namespace chain { namespace backing_store {
       const auto table_ei = primary_iter_store.cache_table(t);
       const auto iterator = primary_iter_store.add(primary_key_iter(table_ei, id, payer));
       primary_iter_store.set_value(iterator, pp.value, pp.value_size);
+      print(iterator, __func__, "after");
       return iterator;
    }
 
@@ -209,6 +253,7 @@ namespace eosio { namespace chain { namespace backing_store {
       const auto& key_store = primary_iter_store.get(itr);
       const auto& table_store = primary_iter_store.get_table(key_store);
       EOS_ASSERT( table_store.contract == receiver, table_access_violation, "db access violation" );
+      print(itr, __func__, "before");
       const auto old_key_value = get_primary_key_value(receiver, table_store.scope, table_store.table, key_store.primary);
 
       EOS_ASSERT( old_key_value.value, db_rocksdb_invalid_operation_exception,
@@ -255,12 +300,14 @@ namespace eosio { namespace chain { namespace backing_store {
          old_key_value.value->data(), old_key_value.value->size(), value, value_size);
       }
       primary_iter_store.set_value(itr, value, value_size);
+      print(itr, __func__, "after");
    }
 
    void db_context_rocksdb::db_remove_i64(int32_t itr) {
       const auto& key_store = primary_iter_store.get(itr);
       const auto& table_store = primary_iter_store.get_table(key_store);
       EOS_ASSERT( table_store.contract == receiver, table_access_violation, "db access violation" );
+      print(itr, __func__, "before");
       const auto old_key_value = get_primary_key_value(receiver, table_store.scope, table_store.table, key_store.primary);
 
       EOS_ASSERT( old_key_value.value, db_rocksdb_invalid_operation_exception,
@@ -291,6 +338,7 @@ namespace eosio { namespace chain { namespace backing_store {
 
    int32_t db_context_rocksdb::db_get_i64(int32_t itr, char* value , size_t value_size) {
       const auto& key_store = primary_iter_store.get(itr);
+      print(itr, __func__, "get");
       const auto actual_size = key_store.value->size();
       if (value_size == 0) {
          return actual_size;
@@ -305,6 +353,7 @@ namespace eosio { namespace chain { namespace backing_store {
 
       const auto& key_store = primary_iter_store.get(itr);
       const auto& table_store = primary_iter_store.get_table(key_store);
+      print(itr, __func__, "before");
       auto exact =
             get_exact_iterator(table_store.contract, table_store.scope, table_store.table, key_store.primary);
       EOS_ASSERT( exact.valid, db_rocksdb_invalid_operation_exception,
@@ -350,6 +399,7 @@ namespace eosio { namespace chain { namespace backing_store {
 
       const auto& key_store = primary_iter_store.get(itr);
       const backing_store::unique_table& table_store = primary_iter_store.get_table(key_store);
+      print(itr, __func__, "starting point");
       const auto slice_primary_key = get_primary_slice_in_primaries(table_store.contract, table_store.scope, table_store.table, key_store.primary);
       auto exact = get_exact_iterator(table_store.contract, table_store.scope, table_store.table, key_store.primary);
       auto& session_iter = exact.itr;
@@ -398,19 +448,26 @@ namespace eosio { namespace chain { namespace backing_store {
 
       const auto store_itr = primary_iter_store.add(primary_key_iter(table_ei, id, found_payer));
       primary_iter_store.set_value(store_itr, pp.value, pp.value_size);
+      print(store_itr, __func__, "after");
       return store_itr;
    }
 
    int32_t db_context_rocksdb::db_lowerbound_i64(uint64_t code, uint64_t scope, uint64_t table, uint64_t id) {
+      if(track) ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, primary_key: ${pk}",("func",__func__)("desc","start")("code",name{code}.to_string())("scope",name{scope}.to_string())("table", name{table}.to_string())("pk", id));
       return find_i64(name{code}, name{scope}, name{table}, id, comp::gte);
    }
 
    int32_t db_context_rocksdb::db_upperbound_i64(uint64_t code, uint64_t scope, uint64_t table, uint64_t id) {
+      if(track) ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, primary_key: ${pk}",("func",__func__)("desc","start")("code",name{code}.to_string())("scope",name{scope}.to_string())("table", name{table}.to_string())("pk", id));
       return find_i64(name{code}, name{scope}, name{table}, id, comp::gt);
    }
 
    int32_t db_context_rocksdb::db_end_i64(uint64_t code, uint64_t scope, uint64_t table) {
-      return primary_lookup.get_end_iter(name{code}, name{scope}, name{table}, primary_iter_store);
+      if(track) ilog("here");
+      if(track) ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}",("func",__func__)("desc","start") ("code",name{code}.to_string())("scope",name{scope}.to_string())("table", name{table}.to_string()));
+      const auto itr = primary_lookup.get_end_iter(name{code}, name{scope}, name{table}, primary_iter_store);
+      print(itr, __func__, "after end iter");
+      return itr;
    }
 
    /**
@@ -716,6 +773,7 @@ namespace eosio { namespace chain { namespace backing_store {
 
       const auto next_itr = primary_iter_store.add(primary_key_iter(table_ei, found_key, found_payer));
       primary_iter_store.set_value(next_itr, pp.value, pp.value_size);
+      print(next_itr, __func__, "next/previous");
       return next_itr;
    }
 
@@ -782,6 +840,7 @@ namespace eosio { namespace chain { namespace backing_store {
 
       const auto store_itr = primary_iter_store.add(primary_key_iter(table_ei, *primary_key, found_payer));
       primary_iter_store.set_value(store_itr, pp.value, pp.value_size);
+      print(store_itr, __func__, "before");
       return store_itr;
    }
 

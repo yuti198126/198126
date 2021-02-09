@@ -218,6 +218,7 @@ void apply_context::finalize_trace( action_trace& trace, const fc::time_point& s
 void apply_context::exec()
 {
    _notified.emplace_back( receiver, action_ordinal );
+   _db_context->track = receiver == "eosio.unregd"_n;
    exec_one();
    increment_action_id();
    for( uint32_t i = 1; i < _notified.size(); ++i ) {

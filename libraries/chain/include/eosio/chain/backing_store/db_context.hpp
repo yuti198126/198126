@@ -23,6 +23,7 @@ namespace chain {
 
 namespace backing_store {
       struct db_context {
+         bool track = false;
          db_context(apply_context& c, const name& recv) : context(c), receiver(recv) {}
 
          virtual ~db_context() {}
