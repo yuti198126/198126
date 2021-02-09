@@ -235,6 +235,7 @@ namespace eosio { namespace chain { namespace backing_store {
 
       primary_lookup.add_table_if_needed(scope_name, table_name, payer);
 
+      int iterator = -1;
       {
       const payer_payload pp{payer, value, value_size};
       set_value(old_key_value.full_key, pp);
@@ -256,7 +257,7 @@ namespace eosio { namespace chain { namespace backing_store {
 
       const unique_table t { receiver, scope_name, table_name };
       const auto table_ei = primary_iter_store.cache_table(t);
-      const auto iterator = primary_iter_store.add(primary_key_iter(table_ei, id, payer));
+      iterator = primary_iter_store.add(primary_key_iter(table_ei, id, payer));
       primary_iter_store.set_value(iterator, pp.value, pp.value_size);
       print(iterator, __func__, "after");
       }
