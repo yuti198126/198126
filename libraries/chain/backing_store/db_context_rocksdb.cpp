@@ -235,6 +235,7 @@ namespace eosio { namespace chain { namespace backing_store {
 
       primary_lookup.add_table_if_needed(scope_name, table_name, payer);
 
+      {
       const payer_payload pp{payer, value, value_size};
       set_value(old_key_value.full_key, pp);
 
@@ -258,6 +259,8 @@ namespace eosio { namespace chain { namespace backing_store {
       const auto iterator = primary_iter_store.add(primary_key_iter(table_ei, id, payer));
       primary_iter_store.set_value(iterator, pp.value, pp.value_size);
       print(iterator, __func__, "after");
+      }
+      print(iterator, __func__, "outside pp scope", false);
       return iterator;
    }
 
