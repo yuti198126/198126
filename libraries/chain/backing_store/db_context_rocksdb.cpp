@@ -170,22 +170,22 @@ namespace eosio { namespace chain { namespace backing_store {
                const auto& key_store = primary_iter_store.get(iterator);
                const auto& table_store = primary_iter_store.get_table(key_store);
                if (!key_store.value) {
-                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, NO DATA",
+                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, ptr: ${ptr}, NO DATA",
                      ("func",func)("desc",desc)
                      ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
-                     ("tei",key_store.table_ei)("iter",iterator));
+                     ("tei",key_store.table_ei)("iter",iterator)("ptr",(uint64_t)&key_store));
                }
                else if (!key_store.value->size()) {
-                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, EMPTY DATA",
+                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, ptr: ${ptr}, value ptr: ${vptr}, EMPTY DATA",
                      ("func",func)("desc",desc)
                      ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
-                     ("tei",key_store.table_ei)("iter",iterator));
+                     ("tei",key_store.table_ei)("iter",iterator)("ptr",(uint64_t)&key_store)("vptr",(uint64_t)key_store.value->data()));
                }
                else {
-                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, value_size: ${vs}, data: ${data}",
+                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, ptr: ${ptr}, value ptr: ${vptr}, value_size: ${vs}, data: ${data}",
                      ("func",func)("desc",desc)
                      ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
-                     ("tei",key_store.table_ei)("iter",iterator)
+                     ("tei",key_store.table_ei)("iter",iterator)("ptr",(uint64_t)&key_store)("vptr",(uint64_t)key_store.value->data())
                      ("vs", key_store.value->size())("data",std::string(key_store.value->data(),key_store.value->size())));
                }
             }
@@ -258,6 +258,7 @@ namespace eosio { namespace chain { namespace backing_store {
       const unique_table t { receiver, scope_name, table_name };
       const auto table_ei = primary_iter_store.cache_table(t);
       iterator = primary_iter_store.add(primary_key_iter(table_ei, id, payer));
+      print(iterator, __func__, "pre-value");
       primary_iter_store.set_value(iterator, pp.value, pp.value_size);
       print(iterator, __func__, "after");
       }
@@ -315,6 +316,7 @@ namespace eosio { namespace chain { namespace backing_store {
          table_store.table, old_payer, payer, name(key_store.primary),
          old_key_value.value->data(), old_key_value.value->size(), value, value_size);
       }
+      print(itr, __func__, "pre-value");
       primary_iter_store.set_value(itr, value, value_size);
       print(itr, __func__, "after");
    }
@@ -440,6 +442,7 @@ namespace eosio { namespace chain { namespace backing_store {
       // check if this key is already in the cache
       const auto find_store_itr = primary_iter_store.find(primary_key_iter(table_ei, id, name{}));
       if (find_store_itr != primary_iter_store.invalid_iterator()) {
+         print(find_store_itr, __func__, "already exists");
          // already in store, and value cache is set
          return find_store_itr;
       }
@@ -463,6 +466,7 @@ namespace eosio { namespace chain { namespace backing_store {
       const account_name found_payer = pp.payer;
 
       const auto store_itr = primary_iter_store.add(primary_key_iter(table_ei, id, found_payer));
+      print(store_itr, __func__, "pre-value");
       primary_iter_store.set_value(store_itr, pp.value, pp.value_size);
       print(store_itr, __func__, "after");
       return store_itr;
@@ -788,6 +792,7 @@ namespace eosio { namespace chain { namespace backing_store {
       const account_name found_payer = pp.payer;
 
       const auto next_itr = primary_iter_store.add(primary_key_iter(table_ei, found_key, found_payer));
+      print(next_itr, __func__, "pre-value");
       primary_iter_store.set_value(next_itr, pp.value, pp.value_size);
       print(next_itr, __func__, "next/previous");
       return next_itr;
@@ -842,6 +847,12 @@ namespace eosio { namespace chain { namespace backing_store {
       else {
          // since key is exact, and we didn't advance, it is id
          primary_key = id;
+
+         const auto find_store_itr = primary_iter_store.find(primary_key_iter(table_ei, id, name{}));
+         if (find_store_itr != primary_iter_store.invalid_iterator()) {
+            print(find_store_itr, __func__, "equals and already exists");
+         }
+         
       }
 
       payer_payload pp(*(*session_iter).second);
@@ -852,11 +863,17 @@ namespace eosio { namespace chain { namespace backing_store {
          EOS_ASSERT( valid, db_rocksdb_invalid_operation_exception,
                      "invariant failure in find_i64, primary key already verified but method indicates it is not a primary key");
          primary_key = key;
+
+         const auto find_store_itr = primary_iter_store.find(primary_key_iter(table_ei, id, name{}));
+         if (find_store_itr != primary_iter_store.invalid_iterator()) {
+            print(find_store_itr, __func__, "upper bound already exists");
+         }
       }
 
       const auto store_itr = primary_iter_store.add(primary_key_iter(table_ei, *primary_key, found_payer));
+      print(store_itr, __func__, "before resetting store");
       primary_iter_store.set_value(store_itr, pp.value, pp.value_size);
-      print(store_itr, __func__, "before");
+      print(store_itr, __func__, "after");
       return store_itr;
    }
 
