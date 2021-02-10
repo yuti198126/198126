@@ -169,24 +169,18 @@ namespace eosio { namespace chain { namespace backing_store {
             else {
                const auto& key_store = primary_iter_store.get(iterator);
                const auto& table_store = primary_iter_store.get_table(key_store);
-               if (!key_store.value) {
-                  ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, ptr: ${ptr}, NO DATA",
-                     ("func",func)("desc",desc)
-                     ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
-                     ("tei",key_store.table_ei)("iter",iterator)("ptr",(uint64_t)&key_store));
-               }
-               else if (!key_store.value->size()) {
+               if (!key_store.value.size()) {
                   ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, ptr: ${ptr}, value ptr: ${vptr}, EMPTY DATA",
                      ("func",func)("desc",desc)
                      ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
-                     ("tei",key_store.table_ei)("iter",iterator)("ptr",(uint64_t)&key_store)("vptr",(uint64_t)key_store.value->data()));
+                     ("tei",key_store.table_ei)("iter",iterator)("ptr",(uint64_t)&key_store)("vptr",(uint64_t)key_store.value.data()));
                }
                else {
                   ilog("${func} ${desc} code: ${code}, scope: ${scope}, table: ${table}, pk: ${pk}, payer: ${payer}, table_ei: ${tei}, iter: ${iter}, ptr: ${ptr}, value ptr: ${vptr}, value_size: ${vs}, data: ${data}",
                      ("func",func)("desc",desc)
                      ("code",table_store.contract.to_string())("scope",table_store.scope.to_string())("table", table_store.table.to_string())("pk",key_store.primary)("payer",key_store.payer)
-                     ("tei",key_store.table_ei)("iter",iterator)("ptr",(uint64_t)&key_store)("vptr",(uint64_t)key_store.value->data())
-                     ("vs", key_store.value->size())("data",std::string(key_store.value->data(),key_store.value->size())));
+                     ("tei",key_store.table_ei)("iter",iterator)("ptr",(uint64_t)&key_store)("vptr",(uint64_t)key_store.value.data())
+                     ("vs", key_store.value.size())("data",std::string(key_store.value.data(),key_store.value.size())));
                }
             }
             if (print_all_iters) {
@@ -357,12 +351,12 @@ namespace eosio { namespace chain { namespace backing_store {
    int32_t db_context_rocksdb::db_get_i64(int32_t itr, char* value , size_t value_size) {
       const auto& key_store = primary_iter_store.get(itr);
       print(itr, __func__, "get");
-      const auto actual_size = key_store.value->size();
+      const auto actual_size = key_store.value.size();
       if (value_size == 0) {
          return actual_size;
       }
       const size_t copy_size = std::min<size_t>(value_size, actual_size);
-      memcpy( value, key_store.value->data(), copy_size );
+      memcpy( value, key_store.value.data(), copy_size );
       return copy_size;
    }
 
